@@ -25,6 +25,7 @@ public:
     bool frameLimiter(int frames);
     void updateCells();
     void randomizer();
+    void resetOffset();
     int checkNeighbours(glm::vec2 cellVec);
     ofColor getRGB();
     int colores[3];
@@ -34,12 +35,15 @@ public:
     glm::vec2 prevOffsetXY;
     glm::vec2 mouseClickPos;
     void cellsSetup();
-    bool pause;
+    ofxToggle pause;
     ofxIntSlider frames;
     ofxIntSlider cellSize;
     ofxIntSlider cellNumCol;
     ofxIntSlider cellNumRow;
     ofxToggle gamerMode;
+    ofxButton randomize;
+    ofxButton clearbtn;
+    ofxButton resetOffsetbtn;
     ofxPanel gui;
 
 };
