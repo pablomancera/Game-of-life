@@ -20,7 +20,7 @@ void ofApp::setup(){
     gui.add(cellNumRow.setup("Numero de columnas", NUM_ROW_CELLS, 5, 100));
     gui.add(cellNumCol.setup("Numero de filas", NUM_COL_CELLS, 5, 100));
     gui.add(gamerMode.setup("Modo geimer", false));
-    gui.add(randomize.setup("randomizar"));
+    gui.add(randomize.setup("Randomizar"));
     gui.add(clearbtn.setup("Limpiar"));
     gui.add(resetOffsetbtn.setup("Resetear camara"));
     gui.add(pause.setup("Pausa ||", true));
