@@ -17,6 +17,8 @@ Project{
             'src/ofApp.h',
             'src/cell.cpp',
             'src/cell.h',
+            'src/filepatternparser.cpp',
+            'src/filepatternparser.h'
         ]
 
         of.addons: [

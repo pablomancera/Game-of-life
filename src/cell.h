@@ -18,6 +18,9 @@ public:
     void revive();
     void toggleLife();
     void updateStatus();
+    void select();
+    void deselect();
+    bool isSelected();
     bool isAlive();
     cell();
 
@@ -25,6 +28,7 @@ private:
     bool live;
     bool tempLive;
     ofColor color;
+    bool selected;
     int x;
     int y;
     int width;

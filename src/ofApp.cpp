@@ -13,6 +13,8 @@
 void ofApp::setup(){
     ofBackground(0);
 
+    filePatternParser fPP = filePatternParser("../patterns");
+
     // Inicializamos los controles gráficos
     gui.setup();
     gui.add(frames.setup("FPS", 60, 1, 60));
@@ -28,11 +30,28 @@ void ofApp::setup(){
     clearbtn.addListener(this, &ofApp::cellsSetup);
     resetOffsetbtn.addListener(this, &ofApp::resetOffset);
 
+    gui.add(guiPatterns.setup("Patrones"));
+    patternKeys = fPP.getKeys();
+    patterns = fPP.getParsedData();
+    currentPattern = "";
+    togglesPattern.resize(patternKeys.size());
+    int i = 0;
+    for (auto patternIterator = patternKeys.begin(); patternIterator != patternKeys.end(); patternIterator++) {
+        guiPatterns.add(togglesPattern[i].setup(*patternIterator, false));
+        togglesPattern[i].addListener(this, &ofApp::switchCurrentPattern);
+        i++;
+    }
+
+    ofAddListener(cellMouseIn, this, &ofApp::onCellMouseIn);
+    ofAddListener(cellMouseOut, this, &ofApp::onCellMouseOut);
+
     // Inicializamos variables del programa.
     prevColRow = glm::vec2(NUM_ROW_CELLS, NUM_COL_CELLS);
     offsetXY = glm::vec2(0, 0);
     prevOffsetXY = glm::vec2(0, 0);
     mouseClickPos = glm::vec2(0, 0);
+    hoveredCellIndex = glm::vec2(-1, -1);
+    switchingPatterns = false;
     // Variables para el RGB, sólo una puede estar a 255, las otras tienen que estar en 0.
     colores[0] = 255;
     colores[1] = 0;
@@ -111,7 +130,8 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-
+    glm::vec2 mousePos(x, y);
+    computeCellsEvents(mousePos);
 }
 
 //--------------------------------------------------------------
@@ -130,20 +150,21 @@ void ofApp::mousePressed(int x, int y, int button){
 
     // Da vida a la celda a la que se le hace click.
     if (button == OF_MOUSE_BUTTON_LEFT) {
-        for (int i = 0; i < cells.size(); i++) {
-            for (int j = 0; j < cells[i].size(); j++) {
-                glm::vec2 mousePos(x, y);
-                glm::vec2 distanceTopLeft(cells[i][j].getX(), cells[i][j].getY());
-                glm::vec2 distanceBotRight(cells[i][j].getX()+cellSize, cells[i][j].getY()+cellSize);
+        selected2alive();
+//        for (int i = 0; i < cells.size(); i++) {
+//            for (int j = 0; j < cells[i].size(); j++) {
+//                glm::vec2 mousePos(x, y);
+//                glm::vec2 distanceTopLeft(cells[i][j].getX(), cells[i][j].getY());
+//                glm::vec2 distanceBotRight(cells[i][j].getX()+cellSize, cells[i][j].getY()+cellSize);
 
-                if (mousePos.x > distanceTopLeft.x &&
-                        mousePos.y > distanceTopLeft.y &&
-                        mousePos.x < distanceBotRight.x &&
-                        mousePos.y < distanceBotRight.y) {
-                    cells[i][j].toggleLife();
-                }
-            }
-        }
+//                if (mousePos.x > distanceTopLeft.x &&
+//                        mousePos.y > distanceTopLeft.y &&
+//                        mousePos.x < distanceBotRight.x &&
+//                        mousePos.y < distanceBotRight.y) {
+//                    cells[i][j].toggleLife();
+//                }
+//            }
+//        }
     }
 
     // Empieza el "movimiento de cámara", que en realidad mueve las células.
@@ -191,6 +212,71 @@ void ofApp::dragEvent(ofDragInfo dragInfo){
 }
 
 //--------------------------------------------------------------
+void ofApp::onCellMouseIn(glm::vec2 & _cellIndex){
+    if (!pause) {
+        return;
+    }
+    hoveredCellIndex = _cellIndex;
+    selectCells();
+}
+
+//--------------------------------------------------------------
+void ofApp::onCellMouseOut(glm::vec2 & _cellIndex){
+    if (!pause) {
+        return;
+    }
+    hoveredCellIndex = glm::vec2(-1, -1);
+    deselectCells();
+}
+
+//--------------------------------------------------------------
+
+void ofApp::selectCells()
+{
+    if (currentPattern == "") {
+        return;
+    }
+    deselectCells();
+    tuple<glm::vec2, glm::vec2, vector<glm::vec2>> pattern = patterns[currentPattern];
+    glm::vec2 size = get<0>(pattern) - glm::vec2(1, 1);
+    glm::vec2 mousepos = get<1>(pattern);
+    vector<glm::vec2> coords = get<2>(pattern);
+    glm::vec2 patternTopLeft = glm::vec2(0, 0) - mousepos + hoveredCellIndex;
+    glm::vec2 patternBotRight = size - mousepos + hoveredCellIndex;
+
+    if (patternTopLeft.x >= 0 &&
+            patternTopLeft.y >= 0 &&
+            patternBotRight.x < cellNumRow &&
+            patternBotRight.y < cellNumCol) {
+        for (auto coordIterator = coords.begin(); coordIterator != coords.end(); coordIterator++) {
+            int xCoord = coordIterator->x - mousepos.x + hoveredCellIndex.x;
+            int yCoord = coordIterator->y - mousepos.y + hoveredCellIndex.y;
+
+            cells[xCoord][yCoord].select();
+        }
+    }
+}
+
+void ofApp::deselectCells()
+{
+    for (auto rowIterator = cells.begin(); rowIterator != cells.end(); rowIterator++) {
+        for (auto colIterator = rowIterator->begin(); colIterator != rowIterator->end(); colIterator++) {
+            colIterator->deselect();
+        }
+    }
+}
+
+void ofApp::selected2alive()
+{
+    for (auto rowIterator = cells.begin(); rowIterator != cells.end(); rowIterator++) {
+        for (auto colIterator = rowIterator->begin(); colIterator != rowIterator->end(); colIterator++) {
+            if (colIterator->isSelected()) {
+                colIterator->toggleLife();
+            }
+        }
+    }
+}
+
 /**
  * Devuelve la cantidad de vecinos que rodean a una célula.
  *
@@ -328,4 +414,58 @@ void ofApp::resetOffset()
 {
     offsetXY = glm::vec2(0, 0);
     prevOffsetXY = glm::vec2(0, 0);
+}
+
+
+void ofApp::switchCurrentPattern(const void * _ofBool, bool & value)
+{
+    if (switchingPatterns) {
+        return;
+    }
+    switchingPatterns = true;
+
+    ofParameter<bool> * ofBool = (ofParameter<bool> *) _ofBool;
+
+    for (auto keyIterator = togglesPattern.begin(); keyIterator != togglesPattern.end(); keyIterator++) {
+        if (keyIterator->getName() != ofBool->getName()) {
+            *keyIterator = false;
+            continue;
+        }
+        currentPattern = ofBool->getName();
+    }
+    if (ofBool->getName() == currentPattern && value == false) {
+        currentPattern = "";
+    }
+    switchingPatterns = false;
+
+}
+
+void ofApp::computeCellsEvents(glm::vec2 mousePos)
+{
+    for (int i = 0; i < cells.size(); i++) {
+        for (int j = 0; j < cells[i].size(); j++) {
+            glm::vec2 distanceTopLeft(cells[i][j].getX(), cells[i][j].getY());
+            glm::vec2 distanceBotRight(cells[i][j].getX()+cellSize, cells[i][j].getY()+cellSize);
+            glm::vec2 cellIndex(i, j);
+
+            if (mousePos.x > distanceTopLeft.x &&
+                    mousePos.y > distanceTopLeft.y &&
+                    mousePos.x < distanceBotRight.x &&
+                    mousePos.y < distanceBotRight.y &&
+                    hoveredCellIndex != cellIndex) {
+                ofNotifyEvent(cellMouseIn, cellIndex);
+            }
+        }
+    }
+    if (hoveredCellIndex.x >= 0 && hoveredCellIndex.y >= 0) {
+        cell hoveredCell = cells[hoveredCellIndex.x][hoveredCellIndex.y];
+        glm::vec2 distanceTopLeft(hoveredCell.getX(), hoveredCell.getY());
+        glm::vec2 distanceBotRight(hoveredCell.getX()+cellSize, hoveredCell.getY()+cellSize);
+        if (mousePos.x < distanceTopLeft.x ||
+                mousePos.y < distanceTopLeft.y ||
+                mousePos.x > distanceBotRight.x ||
+                mousePos.y > distanceBotRight.y) {
+            ofNotifyEvent(cellMouseOut, hoveredCellIndex);
+        }
+    }
 }

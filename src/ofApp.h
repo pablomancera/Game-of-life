@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxGui.h"
 #include "cell.h"
+#include "filepatternparser.h"
 
 class ofApp : public ofBaseApp{
 
@@ -27,9 +28,15 @@ public:
     void randomizer();
     void resetOffset();
     int checkNeighbours(glm::vec2 cellVec);
+    void switchCurrentPattern(const void * _ofBool, bool & value);
+    void computeCellsEvents(glm::vec2 mousePos);
+    glm::vec2 hoveredCellIndex;
     ofColor getRGB();
     int colores[3];
+    string currentPattern;
     vector<vector<cell>> cells;
+    vector<string> patternKeys;
+    map<string, tuple<glm::vec2, glm::vec2, vector<glm::vec2>>> patterns;
     glm::vec2 prevColRow;
     glm::vec2 offsetXY;
     glm::vec2 prevOffsetXY;
@@ -45,5 +52,14 @@ public:
     ofxButton clearbtn;
     ofxButton resetOffsetbtn;
     ofxPanel gui;
-
+    ofxGuiGroup guiPatterns;
+    vector<ofxToggle> togglesPattern;
+    ofEvent<glm::vec2> cellMouseIn;
+    ofEvent<glm::vec2> cellMouseOut;
+    void onCellMouseIn(glm::vec2 & _cellIndex);
+    void onCellMouseOut(glm::vec2 & _cellIndex);
+    bool switchingPatterns;
+    void selectCells();
+    void deselectCells();
+    void selected2alive();
 };

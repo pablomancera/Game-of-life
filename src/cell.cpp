@@ -33,14 +33,30 @@ void cell::update(int _x, int _y, int _width, int _height, ofColor _color)
  */
 void cell::draw()
 {
-    if (live) {
+    if (live && selected) {
+        ofSetColor(192, 32, 32);
+    } else if (live) {
         ofSetColor(color);
+    } else if (selected){
+        ofSetColor(32, 192, 32);
     } else {
         ofSetColor(32);
     }
     ofDrawRectangle(x, y, width, height);
 }
 // Creo que el resto de funciones se explican solas.
+void cell::select()
+{
+    selected = true;
+}
+void cell::deselect()
+{
+    selected = false;
+}
+bool cell::isSelected()
+{
+    return selected;
+}
 int cell::getWidth()
 {
     return width;
