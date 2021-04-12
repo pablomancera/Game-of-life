@@ -47,6 +47,7 @@ public:
     ofxIntSlider cellSize;
     ofxIntSlider cellNumCol;
     ofxIntSlider cellNumRow;
+    ofxIntSlider randomRange;
     ofxToggle gamerMode;
     ofxButton randomize;
     ofxButton clearbtn;

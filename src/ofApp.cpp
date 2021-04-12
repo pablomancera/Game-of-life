@@ -21,8 +21,9 @@ void ofApp::setup(){
     gui.add(cellSize.setup("Tamano de celdas", CELL_SIZE, 5, 50));
     gui.add(cellNumRow.setup("Numero de columnas", NUM_ROW_CELLS, 5, 100));
     gui.add(cellNumCol.setup("Numero de filas", NUM_COL_CELLS, 5, 100));
-    gui.add(gamerMode.setup("Modo geimer", false));
     gui.add(randomize.setup("Randomizar"));
+    gui.add(randomRange.setup("Posibilidad 1/n", 2, 2, 100));
+    gui.add(gamerMode.setup("Modo geimer", false));
     gui.add(clearbtn.setup("Limpiar"));
     gui.add(resetOffsetbtn.setup("Resetear camara"));
     gui.add(pause.setup("Pausa ||", true));
@@ -397,7 +398,7 @@ void ofApp::randomizer()
     cellsSetup();
     for (int i = 0; i < cells.size(); i++) {
         for (int j = 0; j < cells[i].size(); j++) {
-            int rnd = (int) ofRandom(0, 2);
+            int rnd = (int) ofRandom(0, randomRange);
             if (rnd == 1) {
                 cells[i][j].revive();
             }

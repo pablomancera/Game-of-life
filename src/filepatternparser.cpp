@@ -55,7 +55,6 @@ void filePatternParser::parse(string dir)
                     }
                     glm::vec2 pos(xy[0], xy[1]);
                     patternProp == "size" ? get<0>(params) = pos : get<1>(params) = pos;
-                    cout << get<0>(params) << get<1>(params) << endl;
                 }
 
                 if (word != NULL && string(word) == "startcell") {
@@ -87,13 +86,13 @@ void filePatternParser::parse(string dir)
 
     file.close();
 
-    for (auto it = parsedData.begin(); it != parsedData.end(); it++) {
+//    for (auto it = parsedData.begin(); it != parsedData.end(); it++) {
 //        cout << it->first << endl;
 //        cout << '\t' << "size: " << get<0>(it->second) << endl;
 //        cout << '\t' << "mousepos: " << get<1>(it->second) << endl;
 //        cout << '\t' << "startcell" << endl;
-        for (auto it2 = get<2>(it->second).begin(); it2 != get<2>(it->second).end(); it2++) {
-            cout << '\t' << '\t' << *it2 << endl;
-        }
-    }
+//        for (auto it2 = get<2>(it->second).begin(); it2 != get<2>(it->second).end(); it2++) {
+//            cout << '\t' << '\t' << *it2 << endl;
+//        }
+//    }
 }
