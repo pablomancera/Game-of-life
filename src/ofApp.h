@@ -43,6 +43,7 @@ public:
     glm::vec2 mouseClickPos;
     void cellsSetup();
     ofxToggle pause;
+    ofxToggle pencilMode;
     ofxIntSlider frames;
     ofxIntSlider cellSize;
     ofxIntSlider cellNumCol;

@@ -23,6 +23,7 @@ void ofApp::setup(){
     gui.add(cellNumCol.setup("Numero de filas", NUM_COL_CELLS, 5, 100));
     gui.add(randomize.setup("Randomizar"));
     gui.add(randomRange.setup("Posibilidad 1/n", 2, 2, 100));
+    gui.add(pencilMode.setup("Modo pincel", false));
     gui.add(gamerMode.setup("Modo geimer", false));
     gui.add(clearbtn.setup("Limpiar"));
     gui.add(resetOffsetbtn.setup("Resetear camara"));
@@ -137,12 +138,17 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
+    glm::vec2 mousepos = glm::vec2(x, y);
 
     // La mitad del "movimiento de cámara".
     // Calcula la distancia del mouse desde que se hizo click hasta su posición actual, y mueve las células.
     if (button == OF_MOUSE_BUTTON_RIGHT) {
         offsetXY.x = prevOffsetXY.x + (x - mouseClickPos.x);
         offsetXY.y = prevOffsetXY.y + (y - mouseClickPos.y);
+    }
+    if (pencilMode && button == OF_MOUSE_BUTTON_LEFT) {
+        computeCellsEvents(mousepos);
+        selected2alive();
     }
 }
 
@@ -272,6 +278,10 @@ void ofApp::selected2alive()
     for (auto rowIterator = cells.begin(); rowIterator != cells.end(); rowIterator++) {
         for (auto colIterator = rowIterator->begin(); colIterator != rowIterator->end(); colIterator++) {
             if (colIterator->isSelected()) {
+                if (pencilMode) {
+                    colIterator->revive();
+                    continue;
+                }
                 colIterator->toggleLife();
             }
         }
